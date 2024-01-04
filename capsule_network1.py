@@ -130,26 +130,37 @@ state = tf.zeros([tf.shape(capsules)[0], rnn_dim])
 # Initialize the tensor of the input of the generative model of shape [batch_size, gen_dim]
 input = tf.zeros([tf.shape(capsules)[0], gen_dim])
 
-# Repeat the meta-learning operation for a specified number of iterations for i in range(num_iterations):
+# Define 'task' variable
+task = tf.zeros([tf.shape(capsules)[0], num_capsules])  # replace with actual task
+
+# Repeat the meta-learning operation for a specified number of iterations
+for i in range(num_iterations):
 
     # Compute the tensor of the output of the recurrent neural network of shape [batch_size, rnn_dim]
-    # Use a dense layer with a nonlinear activation function on the concatenation of vectors representing the hidden state of the RNN, the input capsules and the task output = tf.layers.dense(tf.concat([state, capsules, task], axis=-1), rnn_dim, activation=tf.nn.relu)
+    # Use a dense layer with a nonlinear activation function on the concatenation of vectors representing the hidden state of the RNN, the input capsules and the task
+    output = tf.keras.layers.Dense(rnn_dim, activation=tf.nn.relu)(tf.concat([state, capsules, task], axis=-1))
 
     # Update the tensor of the hidden state of the recurrent neural network of shape [batch_size, rnn_dim]
-    # Use a dense layer with a linear activation function on the output of the RNN state = tf.layers.dense(output, rnn_dim, activation=None)
+    # Use a dense layer with a linear activation function on the output of the RNN
+    state = tf.keras.layers.Dense(rnn_dim, activation=None)(output)
 
     # Update the tensor of the input of the generative model of shape [batch_size, gen_dim]
-    # Use a dense layer with a nonlinear activation function on the output of the RNN input = tf.layers.dense(output, gen_dim, activation=tf.nn.relu)
+    # Use a dense layer with a nonlinear activation function on the output of the RNN
+    input = tf.keras.layers.Dense(gen_dim, activation=tf.nn.relu)(output)
 
     # Compute the tensor of the output of the generative model of shape [batch_size, gen_dim]
-    # Use a generative adversarial network (GAN) , which consists of two neural networks: a generator and a discriminator. The generator tries to create data that are similar to real ones, and the discriminator tries to distinguish real data from fake ones. Use a dense layer with a linear activation function on the input of the generative model output = tf.layers.dense(input, gen_dim, activation=None)
+    # Use a generative adversarial network (GAN) , which consists of two neural networks: a generator and a discriminator. The generator tries to create data that are similar to real ones, and the discriminator tries to distinguish real data from fake ones. Use a dense layer with a linear activation function on the input of the generative model
+    output = tf.keras.layers.Dense(gen_dim, activation=None)(input)
 
     # Compute the tensor of synthetic data or scenarios of shape [batch_size, data_dim]
-    # Use an activation function appropriate for the type of data or scenarios, such as sigmoidal for binary data or softmax for categorical data synthetic = tf.nn.sigmoid(output)
+    # Use an activation function appropriate for the type of data or scenarios, such as sigmoidal for binary data or softmax for categorical data
+    synthetic = tf.nn.sigmoid(output)
 
     # Use synthetic data or scenarios to train or test capsule network
-    # Use loss function and optimizer appropriate for task such as cross entropy for classification or mean squared error for regression loss = tf.losses.cross_entropy(synthetic, task) optimizer = tf.train.AdamOptimizer() train_op = optimizer.minimize(loss)
+    # Use loss function and optimizer appropriate for task such as cross entropy for classification or mean squared error for regression
+    loss = tf.losses.cross_entropy(synthetic, task)
+    optimizer = tf.train.AdamOptimizer()
+    train_op = optimizer.minimize(loss)
 
 # Return tensor hidden state recurrent neural network shape [batch_size,rnn_dim]
 state
-
