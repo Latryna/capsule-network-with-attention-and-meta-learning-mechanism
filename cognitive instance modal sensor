@@ -1,0 +1,1 @@
+capsules can handle the hierarchical feature learning, attention can help the network focus on important capsules or parts of the input, and meta-learning can allow the network to adapt its weights quickly based on new data.
